@@ -1,0 +1,262 @@
+﻿@model List<MenuComidaMVC.Models.ProductoComida>
+
+@{
+    ViewData["Title"] = "FALLOUT - Menú Digital";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(53, 78, 35, 0.35), transparent 40%), #070a07;
+        color: #d7ff8f;
+        font-family: Consolas, "Courier New", monospace;
+        min-height: 100vh;
+    }
+
+    .pantalla {
+        width: 100%;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .encabezado {
+        border: 3px solid #d8b837;
+        background: rgba(12, 20, 12, 0.95);
+        box-shadow: 0 0 18px rgba(216, 184, 55, 0.55);
+        padding: 18px 24px;
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .marca h1 {
+        margin: 0;
+        color: #f0ce4e;
+        font-size: 48px;
+        letter-spacing: 5px;
+        text-shadow: 0 0 12px rgba(240, 206, 78, 0.7);
+    }
+
+    .marca p {
+        margin: 8px 0 0;
+        font-size: 19px;
+        color: #9dff77;
+        letter-spacing: 2px;
+    }
+
+    .datos {
+        text-align: right;
+    }
+
+        .datos .menu-titulo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+    #reloj {
+        color: #9dff77;
+        font-size: 28px;
+        font-weight: bold;
+        text-shadow: 0 0 8px rgba(157, 255, 119, 0.8);
+    }
+
+    .cuadricula {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .tarjeta {
+        background: rgba(18, 27, 18, 0.96);
+        border: 2px solid #637d32;
+        min-height: 310px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 0 12px rgba(99, 125, 50, 0.35);
+        opacity: 0;
+        transform: translateY(15px) scale(0.97);
+        animation: aparecer 0.6s forwards;
+    }
+
+        .tarjeta::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(157, 255, 119, 0.18);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .tarjeta img {
+            width: 100%;
+            height: 205px;
+            object-fit: cover;
+            display: block;
+            filter: saturate(0.9) contrast(1.05);
+        }
+
+    .info {
+        padding: 14px;
+        text-align: center;
+    }
+
+    .nombre {
+        margin: 0 0 10px;
+        color: #f0ce4e;
+        font-size: 23px;
+        min-height: 54px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .precio {
+        color: #9dff77;
+        font-size: 28px;
+        font-weight: bold;
+        text-shadow: 0 0 7px rgba(157, 255, 119, 0.55);
+    }
+
+    .pie {
+        margin-top: 22px;
+        padding: 14px;
+        text-align: center;
+        border: 2px solid #637d32;
+        background: rgba(12, 20, 12, 0.95);
+        color: #f0ce4e;
+        font-size: 18px;
+        letter-spacing: 1px;
+    }
+
+    @@keyframes aparecer {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .cuadricula {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .encabezado {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .datos {
+            text-align: center;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .cuadricula {
+            grid-template-columns: 1fr;
+        }
+
+        .marca h1 {
+            font-size: 36px;
+        }
+    }
+</style>
+
+<div class="pantalla">
+
+    <header class="encabezado">
+        <div class="marca">
+            <h1>☢ FALLOUT ☢</h1>
+            <p>RESTAURANTE DEL YERMO</p>
+        </div>
+
+        <div class="datos">
+            <div class="menu-titulo">MENÚ DIGITAL</div>
+            <div id="reloj">00:00:00</div>
+        </div>
+    </header>
+
+    <main id="menu" class="cuadricula"></main>
+
+    <footer class="pie">
+        Productos sujetos a existencia en el refugio.
+    </footer>
+
+</div>
+
+<script>
+    let productos = @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(Model)
+        );
+
+    function mezclarProductos(lista) {
+        const copia = [...lista];
+
+        for (let i = copia.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+
+            const temporal = copia[i];
+            copia[i] = copia[j];
+            copia[j] = temporal;
+        }
+
+        return copia;
+    }
+
+    function mostrarMenu() {
+        const contenedor = document.getElementById("menu");
+        const productosMezclados = mezclarProductos(productos);
+
+        contenedor.innerHTML = "";
+
+        productosMezclados.forEach(function (producto, indice) {
+            const tarjeta = document.createElement("article");
+
+            tarjeta.className = "tarjeta";
+            tarjeta.style.animationDelay = `${indice * 70}ms`;
+
+            tarjeta.innerHTML = `
+                <img
+                    src="${producto.Imagen}"
+                    alt="${producto.Nombre}"
+                />
+
+                <div class="info">
+                    <h2 class="nombre">
+                        ${producto.Nombre}
+                    </h2>
+
+                    <div class="precio">
+                        $${Number(producto.Precio).toFixed(2)}
+                    </div>
+                </div>
+            `;
+
+            contenedor.appendChild(tarjeta);
+        });
+    }
+
+    function actualizarReloj() {
+        const ahora = new Date();
+
+        document.getElementById("reloj").textContent =
+            ahora.toLocaleTimeString("es-MX", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+    }
+
+    mostrarMenu();
+    actualizarReloj();
+
+    setInterval(actualizarReloj, 1000);
+    setInterval(mostrarMenu, 5000);
+</script>
