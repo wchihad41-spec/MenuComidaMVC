@@ -1,0 +1,772 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FALLOUT - Terminal de Pedidos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-void: #060a06;
+            --screen-green: #35ff6d;
+            --screen-green-dim: #1c8a3e;
+            --screen-amber: #ffb000;
+            --panel: #0c150d;
+            --panel-border: #1f5a30;
+            --danger: #ff3b30;
+            --glow: 0 0 6px rgba(53,255,109,0.55);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background: var(--bg-void);
+            color: var(--screen-green);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+        }
+
+        body {
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ---------- PIP-BOY FRAME ---------- */
+        .pipboy {
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(160deg,#1a1f1a,#0a0d0a);
+            border: 3px solid #2a3a2a;
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.6);
+        }
+
+        .screen {
+            position: relative;
+            background: radial-gradient(ellipse at 50% 0%, #0b1a0d 0%, #060a06 75%);
+            border: 2px solid var(--panel-border);
+            border-radius: 10px;
+            overflow: hidden;
+            min-height: 80vh;
+        }
+
+        .scanlines {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient( to bottom, rgba(53,255,109,0.05) 0px, rgba(53,255,109,0.05) 1px, transparent 2px, transparent 3px );
+            mix-blend-mode: overlay;
+            animation: flicker 6s infinite;
+            z-index: 5;
+        }
+
+        .crt-vignette {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.85);
+            z-index: 6;
+        }
+
+        @keyframes flicker {
+            0%,100% {
+                opacity: 1;
+            }
+
+            92% {
+                opacity: 1;
+            }
+
+            93% {
+                opacity: 0.85;
+            }
+
+            94% {
+                opacity: 1;
+            }
+        }
+
+        /* ---------- BOOT SEQUENCE ---------- */
+        #boot {
+            position: absolute;
+            inset: 0;
+            background: #060a06;
+            z-index: 20;
+            padding: 40px;
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            line-height: 1.6;
+            color: var(--screen-green);
+            text-shadow: var(--glow);
+        }
+
+            #boot .line {
+                opacity: 0;
+                animation: typeIn .15s forwards;
+            }
+
+        @keyframes typeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #boot .cursor {
+            display: inline-block;
+            width: 10px;
+            background: var(--screen-green);
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* ---------- HEADER ---------- */
+        header {
+            position: relative;
+            z-index: 2;
+            padding: 22px 28px 16px;
+            border-bottom: 2px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .rad-icon {
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--screen-amber);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--screen-amber);
+            font-size: 22px;
+            text-shadow: 0 0 8px var(--screen-amber);
+            animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .brand h1 {
+            font-family: 'VT323', monospace;
+            font-size: 44px;
+            letter-spacing: 6px;
+            color: var(--screen-amber);
+            text-shadow: 0 0 10px rgba(255,176,0,0.6);
+        }
+
+        .brand p {
+            font-size: 13px;
+            letter-spacing: 3px;
+            color: var(--screen-green);
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .clock {
+            text-align: right;
+            font-family: 'VT323', monospace;
+        }
+
+            .clock .label {
+                font-size: 13px;
+                letter-spacing: 3px;
+                opacity: 0.7;
+            }
+
+            .clock .time {
+                font-size: 28px;
+                color: var(--screen-green);
+                text-shadow: var(--glow);
+            }
+
+        /* ---------- TABS ---------- */
+        nav.tabs {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 6px;
+            padding: 14px 28px 0;
+        }
+
+            nav.tabs button {
+                background: transparent;
+                border: 1px solid var(--panel-border);
+                border-bottom: none;
+                color: var(--screen-green-dim);
+                font-family: 'Share Tech Mono', monospace;
+                letter-spacing: 2px;
+                font-size: 13px;
+                padding: 10px 18px;
+                cursor: pointer;
+                border-radius: 6px 6px 0 0;
+                transition: all .15s ease;
+            }
+
+                nav.tabs button.active {
+                    color: var(--screen-amber);
+                    background: var(--panel);
+                    border-color: var(--screen-amber);
+                    text-shadow: 0 0 6px rgba(255,176,0,0.5);
+                }
+
+                nav.tabs button:hover:not(.active) {
+                    color: var(--screen-green);
+                }
+
+        /* ---------- MAIN LAYOUT ---------- */
+        main {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            padding: 20px 28px 28px;
+        }
+
+        @media (max-width:860px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .category-block {
+            margin-bottom: 26px;
+        }
+
+        .category-title {
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            letter-spacing: 4px;
+            color: var(--screen-amber);
+            border-bottom: 1px dashed var(--panel-border);
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .category-title::before {
+                content: "▸";
+            }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+            gap: 16px;
+        }
+
+        .item-card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+
+            .item-card:hover {
+                transform: translateY(-2px);
+                border-color: var(--screen-green);
+                box-shadow: 0 0 16px rgba(53,255,109,0.25);
+            }
+
+        .item-icon {
+            width: 100%;
+            height: 88px;
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            background: repeating-linear-gradient(45deg, rgba(53,255,109,0.03) 0 10px, transparent 10px 20px);
+        }
+
+        .item-name {
+            font-size: 15px;
+            letter-spacing: 1px;
+            color: var(--screen-green);
+        }
+
+        .item-desc {
+            font-size: 11.5px;
+            color: var(--screen-green-dim);
+            line-height: 1.4;
+            min-height: 30px;
+        }
+
+        .item-price {
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            color: var(--screen-amber);
+        }
+
+        .qty-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--panel-border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+            .stepper button {
+                background: #0f1f11;
+                color: var(--screen-green);
+                border: none;
+                width: 28px;
+                height: 28px;
+                cursor: pointer;
+                font-size: 15px;
+            }
+
+                .stepper button:hover {
+                    background: #173a1e;
+                }
+
+            .stepper span {
+                width: 28px;
+                text-align: center;
+                font-size: 13px;
+            }
+
+        .add-btn {
+            background: transparent;
+            border: 1px solid var(--screen-amber);
+            color: var(--screen-amber);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11.5px;
+            letter-spacing: 2px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+            .add-btn:hover {
+                background: var(--screen-amber);
+                color: #0a0d0a;
+            }
+
+            .add-btn:active {
+                transform: scale(0.97);
+            }
+
+        /* ---------- CART ---------- */
+        .cart {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 18px;
+            align-self: start;
+            position: sticky;
+            top: 0;
+        }
+
+            .cart h2 {
+                font-family: 'VT323', monospace;
+                font-size: 22px;
+                letter-spacing: 3px;
+                color: var(--screen-amber);
+                margin-bottom: 12px;
+                border-bottom: 1px dashed var(--panel-border);
+                padding-bottom: 8px;
+            }
+
+        .cart-empty {
+            font-size: 12.5px;
+            color: var(--screen-green-dim);
+            line-height: 1.6;
+        }
+
+        .cart-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            padding: 8px 0;
+            border-bottom: 1px solid #142216;
+            gap: 8px;
+        }
+
+            .cart-line .name {
+                flex: 1;
+            }
+
+            .cart-line .remove {
+                background: none;
+                border: none;
+                color: var(--danger);
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--panel-border);
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            color: var(--screen-green);
+            text-shadow: var(--glow);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            margin-top: 16px;
+            background: var(--screen-green);
+            color: #06110a;
+            border: none;
+            padding: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 3px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: filter .15s ease;
+        }
+
+            .checkout-btn:hover {
+                filter: brightness(1.15);
+            }
+
+            .checkout-btn:disabled {
+                opacity: 0.35;
+                cursor: not-allowed;
+            }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #0c150d;
+            border: 1px solid var(--screen-amber);
+            color: var(--screen-amber);
+            padding: 12px 22px;
+            border-radius: 6px;
+            font-size: 13px;
+            letter-spacing: 2px;
+            opacity: 0;
+            transition: all .25s ease;
+            z-index: 50;
+            text-align: center;
+        }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--panel-border);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pipboy">
+        <div class="screen">
+            <div class="scanlines"></div>
+            <div class="crt-vignette"></div>
+
+            <div id="boot"></div>
+
+            <header>
+                <div class="brand">
+                    <div class="rad-icon">☢</div>
+                    <div>
+                        <h1>FALLOUT</h1>
+                        <p>Restaurante del Yermo · Terminal de Pedidos</p>
+                    </div>
+                </div>
+                <div class="clock">
+                    <div class="label">HORA VAULT-TEC</div>
+                    <div class="time" id="clock">--:--:--</div>
+                </div>
+            </header>
+
+            <nav class="tabs">
+                <button class="active" data-tab="menu">MENÚ</button>
+                <button data-tab="pedido">MI PEDIDO</button>
+                <button data-tab="status">ESTADO</button>
+            </nav>
+
+            <main>
+                <section id="tab-menu">
+                    <!-- categorías generadas por JS -->
+                </section>
+
+                <aside class="cart" id="cartPanel">
+                    <h2>PEDIDO ACTUAL</h2>
+                    <div id="cartBody"><p class="cart-empty">// SIN ARTÍCULOS SELECCIONADOS //<br>Agrega productos del menú para comenzar tu pedido.</p></div>
+                    <div class="cart-total" id="cartTotal" style="display:none;">
+                        <span>TOTAL</span><span id="cartTotalValue">$0.00</span>
+                    </div>
+                    <button class="checkout-btn" id="checkoutBtn" disabled>TRANSMITIR PEDIDO</button>
+                </aside>
+            </main>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>// ---------- DATOS DEL MENÚ (según menú Fallout - Restaurante del Yermo) ----------
+        const MENU = [
+            {
+                categoria: "Bebidas",
+                items: [
+                    { id: "nuka", nombre: "Nuka-Cola", precio: 45, icono: "🥤", desc: "Refresco frío directo del refugio 111." },
+                ]
+            },
+            {
+                categoria: "Entradas",
+                items: [
+                    { id: "papas", nombre: "Papas Vault", precio: 79, icono: "🍟", desc: "Papas rizadas bañadas en salsa radiactiva." },
+                    { id: "alitas", nombre: "Alitas Atómicas", precio: 139, icono: "🍗", desc: "Alitas picantes con dip de dos cabezas." },
+                    { id: "boneless", nombre: "Boneless del Yermo", precio: 129, icono: "🍖", desc: "Boneless bañados en salsa BBQ mutante." },
+                    { id: "tiras", nombre: "Tiras del Refugio", precio: 119, icono: "🍢", desc: "Tiras crujientes con palitos de zanahoria." },
+                ]
+            },
+            {
+                categoria: "Platos Fuertes",
+                items: [
+                    { id: "pollo", nombre: "Pollo Radiactivo", precio: 149, icono: "🍗", desc: "Pollo frito crujiente, receta secreta del Vault." },
+                    { id: "hamburguesa", nombre: "Hamburguesa Nuclear", precio: 169, icono: "🍔", desc: "Doble carne, tocino y queso fundido." },
+                    { id: "cajita", nombre: "Cajita Pip-Boy", precio: 189, icono: "📦", desc: "Combo completo con sorpresa incluida." },
+                ]
+            },
+            {
+                categoria: "Postres",
+                items: [
+                    { id: "postre", nombre: "Postre del Yermo", precio: 69, icono: "🍨", desc: "Malteada doble con topping radiactivo." },
+                ]
+            },
+        ];
+
+        const cart = {}; // { id: { ...item, qty } }
+
+        // ---------- BOOT SEQUENCE ----------
+        const bootLines = [
+            "VAULT-TEC INDUSTRIES (TM) TERMINAL",
+            "INICIALIZANDO SISTEMA DE PEDIDOS...",
+            "CARGANDO BASE DE DATOS DEL RESTAURANTE...",
+            "CONEXIÓN CON COCINA DEL YERMO: OK",
+            "BIENVENIDO, MORADOR.",
+        ];
+        const bootEl = document.getElementById('boot');
+        let delay = 0;
+        bootLines.forEach((line, i) => {
+            const div = document.createElement('div');
+            div.className = 'line';
+            div.style.animationDelay = delay + 'ms';
+            div.textContent = line;
+            bootEl.appendChild(div);
+            delay += 260;
+        });
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        cursor.textContent = '\u00A0\u00A0';
+        bootEl.appendChild(cursor);
+
+        setTimeout(() => {
+            bootEl.style.transition = 'opacity .4s ease';
+            bootEl.style.opacity = '0';
+            setTimeout(() => bootEl.remove(), 400);
+        }, delay + 700);
+
+        // ---------- RELOJ ----------
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('es-MX');
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ---------- RENDER MENÚ ----------
+        const menuSection = document.getElementById('tab-menu');
+
+        function renderMenu() {
+            menuSection.innerHTML = '';
+            MENU.forEach(cat => {
+                const block = document.createElement('div');
+                block.className = 'category-block';
+
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = cat.categoria;
+                block.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'grid';
+
+                cat.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.innerHTML = `
+              <div class="item-icon">${item.icono}</div>
+              <div class="item-name">${item.nombre}</div>
+              <div class="item-desc">${item.desc}</div>
+              <div class="item-price">$${item.precio.toFixed(2)}</div>
+              <div class="qty-row">
+                <div class="stepper">
+                  <button type="button" data-action="dec" data-id="${item.id}">-</button>
+                  <span id="qty-${item.id}">1</span>
+                  <button type="button" data-action="inc" data-id="${item.id}">+</button>
+                </div>
+                <button type="button" class="add-btn" data-action="add" data-id="${item.id}">AGREGAR</button>
+              </div>
+            `;
+                    grid.appendChild(card);
+                });
+
+                block.appendChild(grid);
+                menuSection.appendChild(block);
+            });
+        }
+
+        const localQty = {};
+
+        menuSection.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (!id) return;
+
+            if (action === 'inc' || action === 'dec') {
+                localQty[id] = localQty[id] || 1;
+                localQty[id] = action === 'inc' ? localQty[id] + 1 : Math.max(1, localQty[id] - 1);
+                document.getElementById(`qty-${id}`).textContent = localQty[id];
+            }
+
+            if (action === 'add') {
+                const allItems = MENU.flatMap(c => c.items);
+                const item = allItems.find(i => i.id === id);
+                const qty = localQty[id] || 1;
+                if (cart[id]) {
+                    cart[id].qty += qty;
+                } else {
+                    cart[id] = { ...item, qty };
+                }
+                showToast(`${item.nombre} agregado al pedido`);
+                renderCart();
+            }
+        });
+
+        // ---------- CARRITO ----------
+        const cartBody = document.getElementById('cartBody');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartTotalValue = document.getElementById('cartTotalValue');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        function renderCart() {
+            const entries = Object.values(cart);
+            if (entries.length === 0) {
+                cartBody.innerHTML = '<p class="cart-empty">// SIN ARTÍCULOS SELECCIONADOS //<br>Agrega productos del menú para comenzar tu pedido.</p>';
+                cartTotal.style.display = 'none';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            cartBody.innerHTML = '';
+            let total = 0;
+            entries.forEach(item => {
+                total += item.precio * item.qty;
+                const line = document.createElement('div');
+                line.className = 'cart-line';
+                line.innerHTML = `
+            <span class="name">${item.icono} ${item.nombre} x${item.qty}</span>
+            <span>$${(item.precio * item.qty).toFixed(2)}</span>
+            <button class="remove" data-id="${item.id}" title="Quitar">✕</button>
+          `;
+                cartBody.appendChild(line);
+            });
+
+            cartTotal.style.display = 'flex';
+            cartTotalValue.textContent = `$${total.toFixed(2)}`;
+            checkoutBtn.disabled = false;
+        }
+
+        cartBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('.remove');
+            if (!btn) return;
+            delete cart[btn.dataset.id];
+            renderCart();
+        });
+
+        checkoutBtn.addEventListener('click', () => {
+            showToast('PEDIDO TRANSMITIDO A LA COCINA DEL YERMO ☢');
+            Object.keys(cart).forEach(k => delete cart[k]);
+            renderCart();
+        });
+
+        // ---------- TOAST ----------
+        const toastEl = document.getElementById('toast');
+        let toastTimer;
+        function showToast(msg) {
+            clearTimeout(toastTimer);
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+        }
+
+        // ---------- TABS (solo visual, el menú y carrito ya están siempre visibles en desktop) ----------
+        document.querySelectorAll('nav.tabs button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                if (tab === 'pedido') {
+                    document.getElementById('cartPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else if (tab === 'status') {
+                    showToast('SIN PEDIDOS EN CURSO ACTUALMENTE');
+                }
+            });
+        });
+
+        renderMenu();</script>
+
+</body>
+</html>

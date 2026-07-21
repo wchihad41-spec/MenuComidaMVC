@@ -1,0 +1,268 @@
+﻿@model List<MenuComidaMVC.Models.Pedido>
+
+@{
+    ViewData["Title"] = "FALLOUT - Pedidos";
+
+    string ColorEstado(string estado) => estado switch
+    {
+        "Pendiente" => "#f0ce4e",
+        "En preparación" => "#7fb8ff",
+        "Entregado" => "#9dff77",
+        _ => "#d7ff8f"
+    };
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(53, 78, 35, 0.35), transparent 40%), #070a07;
+        color: #d7ff8f;
+        font-family: Consolas, "Courier New", monospace;
+        min-height: 100vh;
+    }
+
+    .pantalla {
+        width: 100%;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .encabezado {
+        border: 3px solid #d8b837;
+        background: rgba(12, 20, 12, 0.95);
+        box-shadow: 0 0 18px rgba(216, 184, 55, 0.55);
+        padding: 18px 24px;
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .marca h1 {
+        margin: 0;
+        color: #f0ce4e;
+        font-size: 40px;
+        letter-spacing: 4px;
+        text-shadow: 0 0 12px rgba(240, 206, 78, 0.7);
+    }
+
+    .marca p {
+        margin: 8px 0 0;
+        font-size: 17px;
+        color: #9dff77;
+        letter-spacing: 2px;
+    }
+
+    .navegacion a {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 8px 14px;
+        border: 2px solid #637d32;
+        color: #d7ff8f;
+        text-decoration: none;
+        font-size: 14px;
+        letter-spacing: 1px;
+        background: rgba(18, 27, 18, 0.9);
+    }
+
+        .navegacion a:hover {
+            border-color: #f0ce4e;
+            color: #f0ce4e;
+        }
+
+    .confirmacion {
+        border: 2px solid #9dff77;
+        background: rgba(10, 40, 15, 0.85);
+        color: #d7ffb3;
+        padding: 12px 18px;
+        margin-bottom: 18px;
+        letter-spacing: 1px;
+    }
+
+    .lista-pedidos {
+        display: grid;
+        gap: 16px;
+    }
+
+    .pedido {
+        border: 2px solid #637d32;
+        background: rgba(18, 27, 18, 0.96);
+        box-shadow: 0 0 12px rgba(99, 125, 50, 0.35);
+        padding: 18px 20px;
+    }
+
+    .pedido-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        border-bottom: 1px dashed #637d32;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .pedido-id {
+        color: #f0ce4e;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .pedido-cliente {
+        color: #d7ff8f;
+        font-size: 15px;
+    }
+
+    .pedido-fecha {
+        color: #6b7a5e;
+        font-size: 13px;
+    }
+
+    .pedido-items {
+        margin-bottom: 10px;
+    }
+
+    .fila-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        padding: 3px 0;
+        color: #c3e6a0;
+    }
+
+    .pedido-pie {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        border-top: 1px solid #637d32;
+        padding-top: 10px;
+    }
+
+    .pedido-total {
+        color: #9dff77;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .estado-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .estado-badge {
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        padding: 4px 10px;
+        border: 1px solid currentColor;
+    }
+
+    .estado-form select {
+        background: #0c140c;
+        border: 2px solid #637d32;
+        color: #d7ff8f;
+        font-family: inherit;
+        padding: 6px 8px;
+    }
+
+    .estado-form button {
+        background: #1b2a10;
+        border: 2px solid #9dff77;
+        color: #9dff77;
+        font-family: inherit;
+        padding: 6px 12px;
+        cursor: pointer;
+        letter-spacing: 1px;
+    }
+
+        .estado-form button:hover {
+            background: #9dff77;
+            color: #0c140c;
+        }
+
+    .vacio {
+        border: 2px dashed #637d32;
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7a5e;
+        font-size: 16px;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="pantalla">
+
+    <header class="encabezado">
+        <div class="marca">
+            <h1>☢ FALLOUT ☢</h1>
+            <p>PEDIDOS DEL REFUGIO</p>
+        </div>
+
+        <nav class="navegacion">
+            <a asp-controller="Menu" asp-action="Index">MENÚ</a>
+            <a asp-controller="Pedido" asp-action="Crear">NUEVO PEDIDO</a>
+        </nav>
+    </header>
+
+    @if (TempData["Confirmacion"] != null)
+    {
+        <div class="confirmacion">@TempData["Confirmacion"]</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="vacio">No hay pedidos registrados todavía.</div>
+    }
+    else
+    {
+        <div class="lista-pedidos">
+            @foreach (var pedido in Model)
+            {
+                <div class="pedido">
+                    <div class="pedido-encabezado">
+                        <div>
+                            <span class="pedido-id">Pedido #@pedido.Id</span>
+                            <span class="pedido-cliente"> — @pedido.NombreCliente</span>
+                        </div>
+                        <span class="pedido-fecha">@pedido.Fecha.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+
+                    <div class="pedido-items">
+                        @foreach (var item in pedido.Items)
+                        {
+                            <div class="fila-item">
+                                <span>@item.Nombre x@item.Cantidad</span>
+                                <span>$@item.Subtotal.ToString("0.00")</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="pedido-pie">
+                        <span class="pedido-total">Total: $@pedido.Total.ToString("0.00")</span>
+
+                        <form class="estado-form" asp-controller="Pedido" asp-action="CambiarEstado" method="post">
+                            <input type="hidden" name="id" value="@pedido.Id" />
+                            <span class="estado-badge" style="color: @ColorEstado(pedido.Estado)">@pedido.Estado.ToUpper()</span>
+                            <select name="estado">
+                                <option value="Pendiente" selected="@(pedido.Estado == "Pendiente")">Pendiente</option>
+                                <option value="En preparación" selected="@(pedido.Estado == "En preparación")">En preparación</option>
+                                <option value="Entregado" selected="@(pedido.Estado == "Entregado")">Entregado</option>
+                            </select>
+                            <button type="submit">Actualizar</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>
