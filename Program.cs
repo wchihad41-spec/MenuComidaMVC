@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// 1. REGISTRAR PEDIDOSERVICE (Añade esta línea)
+// 1. REGISTRAR PEDIDOSERVICE 
 builder.Services.AddSingleton<PedidoService>();
 
 // 2. REGISTRAR SERVICIO DE SESIÓN

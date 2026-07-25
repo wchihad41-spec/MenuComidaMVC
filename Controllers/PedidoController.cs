@@ -13,7 +13,7 @@ namespace MenuComidaMVC.Controllers
             _pedidoService = pedidoService;
         }
 
-        // --- 1. PANTALLA DE LOGIN ---
+        // --- PANTALLA DE LOGIN ---
         [HttpGet]
         public IActionResult Login()
         {
@@ -30,14 +30,14 @@ namespace MenuComidaMVC.Controllers
                 return View();
             }
 
-            // Guardamos ambos valores por separado en la sesión
+          
             HttpContext.Session.SetString("UsuarioNombre", nombreCliente.Trim());
             HttpContext.Session.SetString("UsuarioRefugio", string.IsNullOrWhiteSpace(refugio) ? "Sin Refugio" : refugio.Trim());
 
             return RedirectToAction(nameof(Crear));
         }
 
-        // --- 2. PANTALLA DE CREAR PEDIDO ---
+        // --- CREAR PEDIDO ---
         [HttpGet]
         public IActionResult Crear()
         {
@@ -98,7 +98,7 @@ namespace MenuComidaMVC.Controllers
             return RedirectToAction(nameof(Lista));
         }
 
-        // --- 3. LISTA DE PEDIDOS ---
+        // --- LISTA DE PEDIDOS ---
         [HttpGet]
         public IActionResult Lista()
         {
@@ -114,7 +114,7 @@ namespace MenuComidaMVC.Controllers
             return RedirectToAction(nameof(Lista));
         }
 
-        // --- 4. OBTENER RECOMENDACIONES (MÉTODO ÚNICO) ---
+        // --- RECOMENDACIONES ---
         [HttpGet]
         public IActionResult ObtenerRecomendaciones(string nombreCliente)
         {
