@@ -2,8 +2,7 @@
 
 namespace MenuComidaMVC.Services
 {
-    // Almacena los pedidos en memoria mientras la aplicación esté en ejecución.
-    // Se registra como Singleton en Program.cs para que los datos persistan entre peticiones.
+    
     public class PedidoService
     {
         private readonly List<Pedido> _pedidos = new();

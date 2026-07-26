@@ -191,6 +191,9 @@
             margin-bottom: 12px;
         }
 
+        /*Autor: Edgar Eduardo Barreto Hernández
+         fecha: 20-07-2026
+         Se agrego el diseño del registro*/
    
     .caja-recomendaciones {
         border: 1px dashed #d8b837;
@@ -290,6 +293,9 @@
     }
 </style>
 
+/* Autor: Edgar Eduardo Barreto Hernández
+Fecha: 20-07-2026
+Se agrego el el contenedor y el diseño de la muestra sobre el habitante que inicio sesion*/
 <div class="pantalla">
 
     <header class="encabezado">
@@ -325,7 +331,9 @@
             <form id="formPedido" asp-controller="Pedido" asp-action="Crear" method="post">
                 <label for="nombreCliente">Nombre del cliente</label>
                 <input type="text" id="nombreCliente" name="nombreCliente" value="@ViewBag.UsuarioActual" readonly style="opacity: 0.8;" />
-
+                /*Autor: Edgar Eduardo Barreto Hernández
+                 Fecha: 20-07-2026
+                 Se agrego el contenedor de recomendaciones*/
                 <!-- CONTENEDOR DE RECOMENDACIONES -->
                 <div id="contenedor-recomendaciones" class="caja-recomendaciones" style="display: none;">
                     <p class="titulo-recomendaciones">⚠️ SUGERENCIAS DE HISTORIAL:</p>
@@ -431,6 +439,10 @@
             }
         });
     });
+
+    /*Autor: Edgar Eduardo Barreto Hernández
+     Fecha: 21-07-2026
+     Se agrego la funcion del resgitro en Script para que se queden en el historial del cliente*/
 
     function agregarOculto(form, nombreCampo, valor) {
         const input = document.createElement("input");

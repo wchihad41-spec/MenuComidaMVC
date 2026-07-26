@@ -13,7 +13,9 @@ namespace MenuComidaMVC.Controllers
             _pedidoService = pedidoService;
         }
 
-        // --- PANTALLA DE LOGIN ---
+        /*AUTOR: Edgar Eduardo Barreto Hernández
+         FECHA: 21-07-2026
+         Se agrego la acción de login*/
         [HttpGet]
         public IActionResult Login()
         {
@@ -114,7 +116,9 @@ namespace MenuComidaMVC.Controllers
             return RedirectToAction(nameof(Lista));
         }
 
-        // --- RECOMENDACIONES ---
+        /*AUTOR: Edgar Eduardo Barreto Hernández
+         FECHA: 21-07-2026
+         Se agrego la acción para obtener recomendaciones*/
         [HttpGet]
         public IActionResult ObtenerRecomendaciones(string nombreCliente)
         {

@@ -1,3 +1,6 @@
+/* Autor: Edgar Eduardo Barreto Hernández
+ fecha: 20-07-2026
+Se agrego el regitro de los pedidos vinculado con el nomnbre del usuario para que se quede en el historial del usuario*/
 using MenuComidaMVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
