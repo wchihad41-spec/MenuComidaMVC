@@ -1,4 +1,5 @@
-﻿namespace MenuComidaMVC.Models
+﻿// Brayan Alonso Cerecedo, capturar tus datos del cliente y pedido
+namespace MenuComidaMVC.Models
 {
     public class ItemPedido
     {

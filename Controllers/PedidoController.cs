@@ -1,4 +1,6 @@
-﻿using MenuComidaMVC.Services;
+﻿// Brayan Alonso Cerecedo, area Captura del pedido
+// nombre del cliente, nombre del producto, precio y cantidad
+using MenuComidaMVC.Services;
 using Microsoft.AspNetCore.Mvc;
 using MenuComidaMVC.Models;
 
